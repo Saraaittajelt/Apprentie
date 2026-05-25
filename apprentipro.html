@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>Apprenti'Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --navy:#0A1628;--navy-mid:#112240;--navy-light:#1A3A6B;
+      --blue:#1E5FFF;--blue-light:#4D83FF;--cyan:#00D4FF;
+      --white:#FFFFFF;--gray-50:#F8FAFF;--gray-100:#EEF2F8;
+      --gray-300:#C5D0E6;--gray-500:#7A8DB0;--text:#0A1628;
+      --success:#00C896;--danger:#FF4D6A;--premium:#FFB800;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    html,body{height:100%;font-family:'DM Sans',sans-serif;background:#0A1628;display:flex;align-items:center;justify-content:center;}
+    .phone{width:390px;height:844px;background:var(--gray-50);border-radius:52px;overflow:hidden;position:relative;box-shadow:0 40px 120px rgba(0,0,0,.6),0 0 0 2px rgba(255,255,255,.08);}
+    .screen{position:absolute;inset:0;display:none;flex-direction:column;background:var(--gray-50);overflow:hidden;}
+    .screen.active{display:flex;}
+    .status-bar{height:44px;padding:14px 24px 0;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .status-bar .time{font-family:'Sora',sans-serif;font-weight:600;font-size:.82rem;color:var(--navy);}
+    .status-icons{display:flex;gap:6px;align-items:center;font-size:.7rem;color:var(--navy);}
+
+    /* SPLASH */
+    #screen-splash{background:linear-gradient(160deg,var(--navy) 0%,var(--navy-mid) 60%,var(--navy-light) 100%);align-items:center;justify-content:center;}
+    .splash-logo{display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:180px;animation:fadeUp .8s ease both;}
+    .splash-icon{width:88px;height:88px;border-radius:28px;background:linear-gradient(135deg,var(--blue) 0%,var(--cyan) 100%);display:flex;align-items:center;justify-content:center;font-size:2.4rem;box-shadow:0 16px 48px rgba(30,95,255,.4);}
+    .splash-name{font-family:'Sora',sans-serif;font-weight:800;font-size:2rem;color:white;letter-spacing:-.02em;}
+    .splash-name span{color:var(--cyan);}
+    .splash-tagline{font-size:.88rem;color:rgba(255,255,255,.5);text-align:center;max-width:220px;line-height:1.5;}
+    .splash-btns{position:absolute;bottom:60px;left:0;right:0;padding:0 32px;display:flex;flex-direction:column;gap:12px;animation:fadeUp .8s .3s ease both;opacity:0;}
+    .btn-sp{border:none;border-radius:16px;padding:16px;font-family:'Sora',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;transition:transform .15s;}
+    .btn-sp:active{transform:scale(.97);}
+    .btn-sp-p{background:linear-gradient(90deg,var(--blue),var(--blue-light));color:white;box-shadow:0 8px 24px rgba(30,95,255,.35);}
+    .btn-sp-s{background:rgba(255,255,255,.08);color:white;border:1px solid rgba(255,255,255,.15);}
+
+    /* CHOICE */
+    #screen-choice{background:linear-gradient(160deg,var(--navy),var(--navy-mid));align-items:center;justify-content:center;padding:32px;}
+    .choice-title{font-family:'Sora',sans-serif;font-weight:800;font-size:1.6rem;color:white;text-align:center;margin-bottom:8px;}
+    .choice-sub{font-size:.88rem;color:rgba(255,255,255,.5);text-align:center;margin-bottom:40px;}
+    .choice-cards{display:flex;flex-direction:column;gap:14px;width:100%;}
+    .choice-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:24px;cursor:pointer;display:flex;align-items:center;gap:16px;transition:all .2s;}
+    .choice-card.selected{background:rgba(30,95,255,.2);border-color:var(--blue);}
+    .ci{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;}
+    .ci-s{background:linear-gradient(135deg,#1E5FFF,#00D4FF);}
+    .ci-c{background:linear-gradient(135deg,#7B2FBE,#FF6B9D);}
+    .choice-card h3{font-family:'Sora',sans-serif;font-weight:700;font-size:1rem;color:white;margin-bottom:3px;}
+    .choice-card p{font-size:.8rem;color:rgba(255,255,255,.5);}
+    .btn-choice{margin-top:auto;width:100%;background:linear-gradient(90deg,var(--blue),var(--blue-light));color:white;border:none;border-radius:16px;padding:16px;font-family:'Sora',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;}
+
+    /* SIGNUP */
+    #screen-signup{background:linear-gradient(160deg,var(--navy),var(--navy-mid));padding:0 28px;overflow-y:auto;}
+    #screen-signup .time{color:white;}
+    #screen-signup .status-icons{color:white;}
+    .back-btn{background:rgba(255,255,255,.1);border:none;border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:1rem;margin-bottom:20px;margin-top:16px;}
+    .signup-title{font-family:'Sora',sans-serif;font-weight:800;font-size:1.5rem;color:white;margin-bottom:6px;}
+    .signup-sub{font-size:.85rem;color:rgba(255,255,255,.5);margin-bottom:24px;}
+    .fg{margin-bottom:14px;}
+    .fl{font-size:.75rem;font-weight:600;color:rgba(255,255,255,.6);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:7px;}
+    .fi{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px 16px;color:white;font-family:'DM Sans',sans-serif;font-size:.92rem;outline:none;transition:border-color .2s;}
+    .fi::placeholder{color:rgba(255,255,255,.3);}
+    .fi:focus{border-color:var(--blue-light);}
+    .btn-signup{width:100%;background:linear-gradient(90deg,var(--blue),var(--blue-light));color:white;border:none;border-radius:16px;padding:16px;font-family:'Sora',sans-serif;font-weight:700;font-size:.95rem;cursor:pointer;margin-top:8px;box-shadow:0 8px 24px rgba(30,95,255,.35);}
+    .signup-login{text-align:center;margin-top:16px;font-size:.83rem;color:rgba(255,255,255,.45);}
+    .signup-login span{color:var(--cyan);cursor:pointer;font-weight:600;}
+
+    /* MAIN */
+    #screen-main{background:var(--gray-50);}
+    .top-bar{background:white;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--gray-100);flex-shrink:0;}
+    .top-logo{font-family:'Sora',sans-serif;font-weight:800;font-size:1.1rem;color:var(--navy);}
+    .top-logo span{color:var(--blue);}
+    .icon-btn{width:36px;height:36px;border-radius:12px;background:var(--gray-100);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;position:relative;}
+    .notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--blue);border:2px solid white;}
+    .top-actions{display:flex;gap:10px;}
+    .tab-content{flex:1;overflow-y:auto;overflow-x:hidden;}
+    .tab-content::-webkit-scrollbar{display:none;}
+    .bottom-nav{background:white;border-top:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-around;padding:8px 0 20px;flex-shrink:0;}
+    .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 12px;border-radius:12px;}
+    .nav-item.active .nav-icon{color:var(--blue);}
+    .nav-item.active .nav-label{color:var(--blue);font-weight:600;}
+    .nav-icon{font-size:1.3rem;color:var(--gray-300);transition:color .2s;}
+    .nav-label{font-size:.62rem;color:var(--gray-500);font-weight:500;}
+    .tab-panel{display:none;}
+    .tab-panel.active{display:block;}
+
+    /* OFFRES */
+    .offers-header{padding:20px 20px 12px;}
+    .offers-title{font-family:'Sora',sans-serif;font-weight:800;font-size:1.25rem;color:var(--navy);margin-bottom:4px;}
+    .offers-sub{font-size:.82rem;color:var(--gray-500);}
+    .filter-row{display:flex;gap:8px;padding:0 20px 16px;overflow-x:auto;}
+    .filter-row::-webkit-scrollbar{display:none;}
+    .chip{padding:7px 14px;border-radius:100px;font-size:.78rem;font-weight:600;white-space:nowrap;cursor:pointer;border:1.5px solid var(--gray-100);background:white;color:var(--gray-500);transition:all .2s;}
+    .chip.active{background:var(--blue);color:white;border-color:var(--blue);}
+    .swipe-area{padding:0 20px;position:relative;height:400px;}
+    .swipe-card{position:absolute;inset:0;background:white;border-radius:24px;box-shadow:0 8px 32px rgba(10,22,40,.1);overflow:hidden;cursor:grab;user-select:none;}
+    .swipe-card-back{transform:scale(.95) translateY(12px);z-index:0;opacity:.7;}
+    .swipe-card-front{z-index:1;}
+    .card-banner{height:110px;background:linear-gradient(135deg,var(--navy),var(--navy-light));display:flex;align-items:center;justify-content:center;position:relative;}
+    .company-logo{width:60px;height:60px;border-radius:18px;background:white;display:flex;align-items:center;justify-content:center;font-size:1.8rem;box-shadow:0 4px 16px rgba(0,0,0,.15);}
+    .match-badge{position:absolute;top:12px;right:12px;background:var(--success);color:white;font-family:'Sora',sans-serif;font-weight:700;font-size:.72rem;padding:4px 10px;border-radius:100px;}
+    .card-body{padding:16px 18px;}
+    .card-job{font-family:'Sora',sans-serif;font-weight:700;font-size:1rem;color:var(--navy);margin-bottom:3px;}
+    .card-co{font-size:.83rem;color:var(--gray-500);margin-bottom:10px;}
+    .card-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+    .ctag{padding:4px 10px;border-radius:8px;font-size:.71rem;font-weight:600;}
+    .ctag-b{background:#EEF4FF;color:var(--blue);}
+    .ctag-g{background:#E8FBF4;color:#00A876;}
+    .ctag-o{background:#FFF4E8;color:#FF8C00;}
+    .card-desc{font-size:.81rem;color:var(--gray-500);line-height:1.6;margin-bottom:12px;}
+    .card-foot{display:flex;align-items:center;justify-content:space-between;}
+    .card-salary{font-family:'Sora',sans-serif;font-weight:700;font-size:.97rem;color:var(--navy);}
+    .card-salary span{font-size:.71rem;font-weight:400;color:var(--gray-500);}
+    .card-loc{font-size:.77rem;color:var(--gray-500);}
+    .swipe-overlay{position:absolute;top:16px;padding:7px 14px;border-radius:10px;font-family:'Sora',sans-serif;font-weight:800;font-size:1.1rem;border:3px solid;opacity:0;pointer-events:none;z-index:10;}
+    .so-like{left:16px;color:var(--success);border-color:var(--success);transform:rotate(-15deg);}
+    .so-nope{right:16px;color:var(--danger);border-color:var(--danger);transform:rotate(15deg);}
+    .swipe-hint{text-align:center;padding:6px 20px;font-size:.74rem;color:var(--gray-300);}
+    .swipe-actions{display:flex;align-items:center;justify-content:center;gap:18px;padding:12px 20px 4px;}
+    .swipe-btn{border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.4rem;transition:transform .15s;}
+    .swipe-btn:active{transform:scale(.9);}
+    .sb-pass{width:56px;height:56px;border-radius:50%;background:white;box-shadow:0 4px 16px rgba(255,77,106,.2);}
+    .sb-like{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));box-shadow:0 4px 20px rgba(30,95,255,.35);font-size:1.7rem;}
+    .sb-super{width:56px;height:56px;border-radius:50%;background:white;box-shadow:0 4px 16px rgba(255,184,0,.2);}
+
+    /* PROFIL */
+    .profile-hero{background:linear-gradient(160deg,var(--navy),var(--navy-light));padding:20px 20px 56px;position:relative;}
+    .profile-av{width:76px;height:76px;border-radius:22px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:1.9rem;border:3px solid white;margin-bottom:12px;}
+    .profile-name{font-family:'Sora',sans-serif;font-weight:800;font-size:1.15rem;color:white;margin-bottom:3px;}
+    .profile-meta{font-size:.81rem;color:rgba(255,255,255,.55);}
+    .profile-pct{position:absolute;right:20px;top:20px;background:rgba(255,255,255,.1);border-radius:12px;padding:8px 12px;text-align:center;}
+    .profile-pct-n{font-family:'Sora',sans-serif;font-weight:800;font-size:1.2rem;color:white;}
+    .profile-pct-l{font-size:.65rem;color:rgba(255,255,255,.5);}
+    .profile-body{padding:0 16px;margin-top:-28px;}
+    .pcard{background:white;border-radius:20px;padding:18px;margin-bottom:12px;box-shadow:0 4px 16px rgba(10,22,40,.06);}
+    .pcard-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .pcard-title{font-family:'Sora',sans-serif;font-weight:700;font-size:.9rem;color:var(--navy);}
+    .edit-btn{background:var(--gray-100);border:none;border-radius:8px;padding:5px 10px;font-size:.72rem;font-weight:600;color:var(--blue);cursor:pointer;}
+    .info-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;}
+    .info-ic{width:32px;height:32px;border-radius:10px;background:var(--gray-100);display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
+    .info-lbl{font-size:.71rem;color:var(--gray-500);margin-bottom:1px;}
+    .info-val{font-size:.86rem;font-weight:600;color:var(--navy);}
+    .skill-tags{display:flex;gap:6px;flex-wrap:wrap;}
+    .skill-tag{padding:5px 12px;border-radius:100px;background:var(--gray-100);font-size:.76rem;font-weight:600;color:var(--navy);}
+    .cv-upload{border:2px dashed var(--gray-100);border-radius:14px;padding:20px;text-align:center;cursor:pointer;}
+    .cv-icon{font-size:2rem;margin-bottom:8px;}
+    .cv-text{font-size:.84rem;font-weight:600;color:var(--navy);margin-bottom:4px;}
+    .cv-sub{font-size:.74rem;color:var(--gray-500);}
+    .prem-banner{background:linear-gradient(135deg,#1A1040,#3B1F8C);border-radius:20px;padding:18px;margin-bottom:12px;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:0 8px 24px rgba(59,31,140,.3);}
+    .prem-icon{font-size:2rem;}
+    .prem-txt h3{font-family:'Sora',sans-serif;font-weight:700;font-size:.9rem;color:white;margin-bottom:3px;}
+    .prem-txt p{font-size:.77rem;color:rgba(255,255,255,.6);}
+    .prem-badge{margin-left:auto;background:var(--premium);color:var(--navy);font-family:'Sora',sans-serif;font-weight:700;font-size:.71rem;padding:5px 10px;border-radius:8px;white-space:nowrap;}
+
+    /* MESSAGES */
+    .msg-hd{padding:20px 20px 8px;}
+    .msg-title{font-family:'Sora',sans-serif;font-weight:800;font-size:1.25rem;color:var(--navy);margin-bottom:14px;}
+    .search-bar{background:white;border:1px solid var(--gray-100);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:10px;}
+    .search-bar input{border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:.87rem;color:var(--navy);background:transparent;flex:1;}
+    .search-bar input::placeholder{color:var(--gray-300);}
+    .bot-banner{margin:12px 20px;background:linear-gradient(135deg,var(--navy),var(--navy-light));border-radius:20px;padding:16px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;}
+    .bot-ic{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+    .bot-txt h3{font-family:'Sora',sans-serif;font-weight:700;font-size:.9rem;color:white;margin-bottom:2px;}
+    .bot-txt p{font-size:.74rem;color:rgba(255,255,255,.55);}
+    .sec-lbl{padding:8px 20px;font-size:.71rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-500);}
+    .msg-item{padding:14px 20px;display:flex;gap:12px;align-items:center;cursor:pointer;}
+    .msg-av{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;position:relative;}
+    .msg-av-co{background:linear-gradient(135deg,var(--navy),var(--navy-light));}
+    .online-dot{position:absolute;bottom:2px;right:2px;width:10px;height:10px;border-radius:50%;background:var(--success);border:2px solid var(--gray-50);}
+    .msg-body{flex:1;min-width:0;}
+    .msg-name{font-family:'Sora',sans-serif;font-weight:700;font-size:.87rem;color:var(--navy);margin-bottom:3px;}
+    .msg-prev{font-size:.79rem;color:var(--gray-500);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .msg-meta{display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
+    .msg-time{font-size:.7rem;color:var(--gray-300);}
+    .msg-unread{background:var(--blue);color:white;font-family:'Sora',sans-serif;font-weight:700;font-size:.64rem;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+
+    /* CHAT */
+    #screen-chat{background:var(--gray-50);}
+    .chat-hd{background:white;padding:12px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--gray-100);flex-shrink:0;}
+    .chat-back{background:var(--gray-100);border:none;border-radius:10px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;color:var(--navy);}
+    .chat-av{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:1rem;}
+    .chat-info h3{font-family:'Sora',sans-serif;font-weight:700;font-size:.9rem;color:var(--navy);}
+    .chat-info p{font-size:.71rem;color:var(--success);font-weight:600;}
+    .chat-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
+    .chat-msgs::-webkit-scrollbar{display:none;}
+    .mbw{display:flex;align-items:flex-end;gap:8px;}
+    .mbw.sent{flex-direction:row-reverse;}
+    .bav{width:28px;height:28px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;}
+    .bubble{max-width:70%;padding:11px 14px;border-radius:18px;font-size:.84rem;line-height:1.5;}
+    .bubble.r{background:white;color:var(--navy);border-radius:4px 18px 18px 18px;box-shadow:0 2px 8px rgba(10,22,40,.06);}
+    .bubble.s{background:linear-gradient(135deg,var(--blue),var(--blue-light));color:white;border-radius:18px 4px 18px 18px;}
+    .bt{font-size:.64rem;color:var(--gray-300);margin-top:4px;text-align:right;}
+    .quick-rep{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto;}
+    .quick-rep::-webkit-scrollbar{display:none;}
+    .qr{padding:7px 14px;border-radius:100px;background:white;border:1.5px solid var(--gray-100);font-size:.77rem;font-weight:600;color:var(--blue);white-space:nowrap;cursor:pointer;flex-shrink:0;}
+    .chat-input-bar{background:white;border-top:1px solid var(--gray-100);padding:10px 16px 28px;display:flex;gap:10px;align-items:center;}
+    .ci-input{flex:1;background:var(--gray-100);border:none;border-radius:12px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:.87rem;outline:none;color:var(--navy);}
+    .ci-input::placeholder{color:var(--gray-300);}
+    .send-btn{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--blue),var(--blue-light));border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;flex-shrink:0;}
+
+    /* ENTREPRISE */
+    .co-hd{padding:20px 20px 16px;}
+    .co-title{font-family:'Sora',sans-serif;font-weight:800;font-size:1.25rem;color:var(--navy);margin-bottom:4px;}
+    .co-sub{font-size:.81rem;color:var(--gray-500);}
+    .btn-post{margin:0 20px 16px;background:linear-gradient(90deg,var(--blue),var(--blue-light));color:white;border:none;border-radius:14px;padding:14px;font-family:'Sora',sans-serif;font-weight:700;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 40px);box-shadow:0 6px 20px rgba(30,95,255,.3);}
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 20px 16px;}
+    .stat-card{background:white;border-radius:16px;padding:14px 12px;text-align:center;box-shadow:0 2px 10px rgba(10,22,40,.05);}
+    .stat-num{font-family:'Sora',sans-serif;font-weight:800;font-size:1.4rem;color:var(--navy);}
+    .stat-lbl{font-size:.67rem;color:var(--gray-500);margin-top:2px;}
+    .ann-list{padding:0 20px;}
+    .ann-card{background:white;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(10,22,40,.05);}
+    .ann-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+    .ann-title{font-family:'Sora',sans-serif;font-weight:700;font-size:.91rem;color:var(--navy);margin-bottom:3px;}
+    .ann-date{font-size:.71rem;color:var(--gray-500);}
+    .ann-status{padding:4px 10px;border-radius:8px;font-size:.7rem;font-weight:700;}
+    .ann-active{background:#E8FBF4;color:#00A876;}
+    .ann-draft{background:var(--gray-100);color:var(--gray-500);}
+    .ann-stats{display:flex;gap:14px;}
+    .ann-stat{display:flex;align-items:center;gap:5px;font-size:.77rem;color:var(--gray-500);}
+    .cand-list{padding:0 20px 20px;}
+    .sec-sm{font-family:'Sora',sans-serif;font-weight:700;font-size:.91rem;color:var(--navy);margin-bottom:12px;}
+    .cand-card{background:white;border-radius:14px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(10,22,40,.05);}
+    .cand-av{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+    .cand-info h4{font-family:'Sora',sans-serif;font-weight:700;font-size:.86rem;color:var(--navy);margin-bottom:2px;}
+    .cand-info p{font-size:.75rem;color:var(--gray-500);}
+    .cand-match{margin-left:auto;background:linear-gradient(135deg,var(--blue),var(--cyan));color:white;font-family:'Sora',sans-serif;font-weight:700;font-size:.71rem;padding:4px 10px;border-radius:8px;}
+    .cand-btns{display:flex;gap:8px;margin-top:10px;}
+    .btn-sm{flex:1;border:none;border-radius:10px;padding:9px;font-family:'Sora',sans-serif;font-weight:600;font-size:.77rem;cursor:pointer;}
+    .btn-sm-p{background:var(--blue);color:white;}
+    .btn-sm-s{background:var(--gray-100);color:var(--navy);}
+
+    /* PREMIUM SCREEN */
+    #screen-premium{background:linear-gradient(160deg,#0D0620,#1A0840 50%,#0D0620);align-items:center;justify-content:flex-start;}
+    .prem-hd{width:100%;padding:20px 20px 0;display:flex;justify-content:flex-end;}
+    .prem-close{background:rgba(255,255,255,.1);border:none;border-radius:10px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:1rem;}
+    .prem-content{padding:16px 28px 32px;text-align:center;overflow-y:auto;}
+    .prem-crown{font-size:3.2rem;margin-bottom:14px;}
+    .prem-title{font-family:'Sora',sans-serif;font-weight:800;font-size:1.5rem;color:white;margin-bottom:8px;line-height:1.2;}
+    .prem-title span{color:var(--premium);}
+    .prem-desc{font-size:.87rem;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:24px;}
+    .prem-feats{display:flex;flex-direction:column;gap:12px;margin-bottom:24px;text-align:left;}
+    .prem-feat{display:flex;gap:12px;align-items:flex-start;}
+    .feat-ic{width:36px;height:36px;border-radius:12px;background:rgba(255,184,0,.15);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+    .feat-txt h4{font-family:'Sora',sans-serif;font-weight:700;font-size:.87rem;color:white;margin-bottom:2px;}
+    .feat-txt p{font-size:.77rem;color:rgba(255,255,255,.45);}
+    .prem-plans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+    .plan{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:16px;padding:16px;text-align:center;cursor:pointer;}
+    .plan.popular{border-color:var(--premium);background:rgba(255,184,0,.08);}
+    .plan-pop{background:var(--premium);color:var(--navy);font-family:'Sora',sans-serif;font-weight:700;font-size:.64rem;padding:3px 8px;border-radius:100px;display:inline-block;margin-bottom:8px;}
+    .plan-price{font-family:'Sora',sans-serif;font-weight:800;font-size:1.5rem;color:white;}
+    .plan-per{font-size:.71rem;color:rgba(255,255,255,.4);}
+    .plan-name{font-size:.77rem;color:rgba(255,255,255,.6);margin-top:4px;}
+    .btn-prem{width:100%;background:linear-gradient(90deg,var(--premium),#FF8C00);color:var(--navy);border:none;border-radius:16px;padding:16px;font-family:'Sora',sans-serif;font-weight:800;font-size:.94rem;cursor:pointer;box-shadow:0 8px 24px rgba(255,184,0,.3);}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- SPLASH -->
+  <div class="screen active" id="screen-splash" style="display:flex;">
+    <div class="splash-logo">
+      <div class="splash-icon">🎓</div>
+      <div class="splash-name">Apprenti<span>'Pro</span></div>
+      <div class="splash-tagline">Trouve ton alternance parfaite en quelques swipes</div>
+    </div>
+    <div class="splash-btns">
+      <button class="btn-sp btn-sp-p" onclick="go('screen-choice')">Commencer</button>
+      <button class="btn-sp btn-sp-s" onclick="go('screen-main')">J'ai déjà un compte</button>
+    </div>
+  </div>
+
+  <!-- CHOICE -->
+  <div class="screen" id="screen-choice">
+    <div style="background:linear-gradient(160deg,var(--navy),var(--navy-mid));flex:1;padding:60px 28px 32px;display:flex;flex-direction:column;">
+      <div class="choice-title">Tu es qui ?</div>
+      <div class="choice-sub">Sélectionne ton profil pour personnaliser ton expérience</div>
+      <div class="choice-cards">
+        <div class="choice-card" id="cs" onclick="sel('cs')">
+          <div class="ci ci-s">🎓</div>
+          <div><h3>Je cherche une alternance</h3><p>Étudiant · BTS, Licence, Master...</p></div>
+        </div>
+        <div class="choice-card" id="cc" onclick="sel('cc')">
+          <div class="ci ci-c">🏢</div>
+          <div><h3>Je recrute un alternant</h3><p>Entreprise · TPE, PME, Grand groupe</p></div>
+        </div>
+      </div>
+      <button class="btn-choice" style="margin-top:32px;" onclick="go('screen-signup')">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- SIGNUP -->
+  <div class="screen" id="screen-signup" style="overflow-y:auto;">
+    <div class="status-bar"><span class="time" style="color:white;">9:41</span><div class="status-icons" style="color:white;">●●● ▐ 🔋</div></div>
+    <button class="back-btn" onclick="go('screen-choice')">←</button>
+    <div style="padding:0 28px 32px;">
+      <div class="signup-title">Crée ton compte</div>
+      <div class="signup-sub">Quelques infos pour commencer — tu complètes le reste plus tard</div>
+      <div class="fg"><label class="fl">Prénom</label><input class="fi" type="text" placeholder="Ex: Sara"/></div>
+      <div class="fg"><label class="fl">Email</label><input class="fi" type="email" placeholder="ton@email.com"/></div>
+      <div class="fg"><label class="fl">Domaine d'études</label><input class="fi" type="text" placeholder="Ex: Commerce, Marketing..."/></div>
+      <div class="fg"><label class="fl">Mot de passe</label><input class="fi" type="password" placeholder="••••••••"/></div>
+      <button class="btn-signup" onclick="go('screen-main')">Créer mon compte 🚀</button>
+      <div class="signup-login">Déjà inscrit ? <span onclick="go('screen-main')">Se connecter</span></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="screen" id="screen-main">
+    <div class="status-bar" style="background:white;"><span class="time">9:41</span><div class="status-icons">●●● ▐ 🔋</div></div>
+    <div class="top-bar">
+      <div class="top-logo">Apprenti<span>'Pro</span></div>
+      <div class="top-actions">
+        <button class="icon-btn">🔔<span class="notif-dot"></span></button>
+        <button class="icon-btn">⚙️</button>
+      </div>
+    </div>
+    <div class="tab-content">
+
+      <!-- OFFRES -->
+      <div class="tab-panel active" id="tab-offres">
+        <div class="offers-header">
+          <div class="offers-title">Offres pour toi ✨</div>
+          <div class="offers-sub">Basé sur ton profil · 47 offres disponibles</div>
+        </div>
+        <div class="filter-row">
+          <div class="chip active">Tous</div><div class="chip">Commerce</div><div class="chip">Marketing</div><div class="chip">IT</div><div class="chip">RH</div><div class="chip">Finance</div>
+        </div>
+        <div class="swipe-area" id="swipeArea">
+          <div class="swipe-card swipe-card-back">
+            <div class="card-banner"><div class="company-logo">🛒</div></div>
+            <div class="card-body"><div class="card-job">Assistant Commercial B2B</div><div class="card-co">📍 Carrefour · Boulogne-Billancourt</div></div>
+          </div>
+          <div class="swipe-card swipe-card-front" id="mainCard">
+            <div class="swipe-overlay so-like" id="likeOv">MATCH ✓</div>
+            <div class="swipe-overlay so-nope" id="nopeOv">PASS ✗</div>
+            <div class="card-banner">
+              <div class="company-logo">💼</div>
+              <div class="match-badge">⚡ 94% match</div>
+            </div>
+            <div class="card-body">
+              <div class="card-job">Chargé(e) de Développement Commercial</div>
+              <div class="card-co">📍 Accenture · Paris 8ème</div>
+              <div class="card-tags">
+                <span class="ctag ctag-b">BAC+3/4</span>
+                <span class="ctag ctag-g">1 an · Alternance</span>
+                <span class="ctag ctag-o">Débutant OK</span>
+              </div>
+              <div class="card-desc">Intégrez une équipe commerciale dynamique. Prospection clients, suivi de portefeuille, reporting. Formation assurée en interne.</div>
+              <div class="card-foot">
+                <div><div class="card-salary">1 200 € <span>/ mois</span></div><div class="card-loc">🚇 Ligne 9 — 5 min</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="swipe-hint">← Passer &nbsp;|&nbsp; Liker →</div>
+        <div class="swipe-actions">
+          <button class="swipe-btn sb-pass" onclick="swipe('left')">❌</button>
+          <button class="swipe-btn sb-like" onclick="swipe('right')">💙</button>
+          <button class="swipe-btn sb-super" onclick="swipe('super')">⭐</button>
+        </div>
+      </div>
+
+      <!-- PROFIL -->
+      <div class="tab-panel" id="tab-profil">
+        <div class="profile-hero">
+          <div class="profile-pct"><div class="profile-pct-n">72%</div><div class="profile-pct-l">Complété</div></div>
+          <div class="profile-av">👤</div>
+          <div class="profile-name">Sara Ait Tajelt</div>
+          <div class="profile-meta">BUT TC · IUT de Sceaux</div>
+        </div>
+        <div class="profile-body">
+          <div class="prem-banner" onclick="go('screen-premium')">
+            <div class="prem-icon">👑</div>
+            <div class="prem-txt"><h3>Passe en Premium</h3><p>Aide CV · Coaching entretien · Profil boosté</p></div>
+            <div class="prem-badge">⭐ Pro</div>
+          </div>
+          <div class="pcard">
+            <div class="pcard-hd"><div class="pcard-title">📄 Mon CV</div><button class="edit-btn">Modifier</button></div>
+            <div class="cv-upload"><div class="cv-icon">📎</div><div class="cv-text">Ajouter mon CV</div><div class="cv-sub">PDF · Max 5MB</div></div>
+          </div>
+          <div class="pcard">
+            <div class="pcard-hd"><div class="pcard-title">👤 Mon profil</div><button class="edit-btn">Modifier</button></div>
+            <div class="info-row"><div class="info-ic">🎓</div><div><div class="info-lbl">Formation</div><div class="info-val">BUT Techniques de Commercialisation</div></div></div>
+            <div class="info-row"><div class="info-ic">🏫</div><div><div class="info-lbl">École</div><div class="info-val">IUT de Sceaux · Paris-Saclay</div></div></div>
+            <div class="info-row"><div class="info-ic">📍</div><div><div class="info-lbl">Localisation</div><div class="info-val">Courbevoie, Île-de-France</div></div></div>
+            <div class="info-row"><div class="info-ic">📅</div><div><div class="info-lbl">Disponibilité</div><div class="info-val">Septembre 2026</div></div></div>
+          </div>
+          <div class="pcard">
+            <div class="pcard-hd"><div class="pcard-title">⚡ Compétences</div><button class="edit-btn">+ Ajouter</button></div>
+            <div class="skill-tags">
+              <span class="skill-tag">Prospection B2B</span><span class="skill-tag">CRM</span><span class="skill-tag">Excel</span><span class="skill-tag">Anglais C1</span><span class="skill-tag">Canva</span><span class="skill-tag">Marketing</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MESSAGES -->
+      <div class="tab-panel" id="tab-messages">
+        <div class="msg-hd">
+          <div class="msg-title">Messages</div>
+          <div class="search-bar"><span>🔍</span><input type="text" placeholder="Rechercher..."/></div>
+        </div>
+        <div class="bot-banner" onclick="go('screen-chat')">
+          <div class="bot-ic">🤖</div>
+          <div class="bot-txt"><h3>Assistant Apprenti'Pro</h3><p>Répond à toutes tes questions 24h/24</p></div>
+          <div style="margin-left:auto;color:rgba(255,255,255,.4);font-size:1.2rem;">›</div>
+        </div>
+        <div class="sec-lbl">Entreprises</div>
+        <div class="msg-item" onclick="go('screen-chat')">
+          <div class="msg-av msg-av-co">💼<div class="online-dot"></div></div>
+          <div class="msg-body"><div class="msg-name">Accenture — RH</div><div class="msg-prev">Bonjour ! Nous avons bien reçu votre candidature...</div></div>
+          <div class="msg-meta"><div class="msg-time">14:32</div><div class="msg-unread">2</div></div>
+        </div>
+        <div class="msg-item">
+          <div class="msg-av msg-av-co">🏦</div>
+          <div class="msg-body"><div class="msg-name">BNP Paribas — Recrutement</div><div class="msg-prev">Votre profil nous intéresse. Seriez-vous disponible...</div></div>
+          <div class="msg-meta"><div class="msg-time">Hier</div></div>
+        </div>
+        <div class="msg-item">
+          <div class="msg-av msg-av-co">🛒</div>
+          <div class="msg-body"><div class="msg-name">Carrefour — DRH</div><div class="msg-prev">Merci pour votre intérêt. Nous revenons vers vous...</div></div>
+          <div class="msg-meta"><div class="msg-time">Lun.</div></div>
+        </div>
+      </div>
+
+      <!-- ENTREPRISE -->
+      <div class="tab-panel" id="tab-entreprise">
+        <div class="co-hd"><div class="co-title">Espace Recruteur 🏢</div><div class="co-sub">Gérez vos annonces et candidatures</div></div>
+        <button class="btn-post">➕ Publier une annonce</button>
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-num">3</div><div class="stat-lbl">Annonces actives</div></div>
+          <div class="stat-card"><div class="stat-num">47</div><div class="stat-lbl">Candidatures</div></div>
+          <div class="stat-card"><div class="stat-num">12</div><div class="stat-lbl">Matchs</div></div>
+        </div>
+        <div class="ann-list">
+          <div class="ann-card">
+            <div class="ann-hd"><div><div class="ann-title">Chargé(e) Commercial B2B</div><div class="ann-date">Publiée le 12 mai 2026</div></div><div class="ann-status ann-active">Active</div></div>
+            <div class="ann-stats"><div class="ann-stat">👁️ 234 vues</div><div class="ann-stat">📩 18 candidatures</div><div class="ann-stat">⚡ 5 matchs</div></div>
+          </div>
+          <div class="ann-card">
+            <div class="ann-hd"><div><div class="ann-title">Assistant Marketing Digital</div><div class="ann-date">Publiée le 8 mai 2026</div></div><div class="ann-status ann-active">Active</div></div>
+            <div class="ann-stats"><div class="ann-stat">👁️ 189 vues</div><div class="ann-stat">📩 12 candidatures</div><div class="ann-stat">⚡ 4 matchs</div></div>
+          </div>
+          <div class="ann-card">
+            <div class="ann-hd"><div><div class="ann-title">Analyste Data Junior</div><div class="ann-date">Brouillon</div></div><div class="ann-status ann-draft">Brouillon</div></div>
+          </div>
+        </div>
+        <div class="cand-list">
+          <div class="sec-sm">🔥 Top candidats</div>
+          <div class="cand-card"><div class="cand-av">👤</div><div class="cand-info"><h4>Sara A.</h4><p>BUT TC · IUT Sceaux · Anglais C1</p></div><div class="cand-match">94%</div></div>
+          <div class="cand-btns"><button class="btn-sm btn-sm-s">Passer</button><button class="btn-sm btn-sm-p">Contacter</button></div>
+          <div class="cand-card" style="margin-top:10px;"><div class="cand-av">👤</div><div class="cand-info"><h4>Lucas M.</h4><p>Master Marketing · Paris II</p></div><div class="cand-match">88%</div></div>
+          <div class="cand-btns"><button class="btn-sm btn-sm-s">Passer</button><button class="btn-sm btn-sm-p">Contacter</button></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="bottom-nav">
+      <div class="nav-item active" id="nav-offres" onclick="tab('offres')"><div class="nav-icon">🔍</div><div class="nav-label">Offres</div></div>
+      <div class="nav-item" id="nav-profil" onclick="tab('profil')"><div class="nav-icon">👤</div><div class="nav-label">Mon profil</div></div>
+      <div class="nav-item" id="nav-messages" onclick="tab('messages')"><div class="nav-icon">💬</div><div class="nav-label">Messages</div></div>
+      <div class="nav-item" id="nav-entreprise" onclick="tab('entreprise')"><div class="nav-icon">🏢</div><div class="nav-label">Recruteur</div></div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="screen" id="screen-chat">
+    <div class="status-bar" style="background:white;"><span class="time">9:41</span><div class="status-icons">●●● ▐ 🔋</div></div>
+    <div class="chat-hd">
+      <button class="chat-back" onclick="go('screen-main')">←</button>
+      <div class="chat-av">🤖</div>
+      <div class="chat-info"><h3>Assistant Apprenti'Pro</h3><p>● En ligne</p></div>
+    </div>
+    <div class="chat-msgs" id="chatMsgs">
+      <div class="mbw"><div class="bav">🤖</div><div><div class="bubble r">Bonjour ! Je suis l'assistant Apprenti'Pro 👋 Comment puis-je t'aider ?</div><div class="bt">14:30</div></div></div>
+      <div class="mbw sent"><div><div class="bubble s">Comment fonctionne le matching ?</div><div class="bt">14:31</div></div></div>
+      <div class="mbw"><div class="bav">🤖</div><div><div class="bubble r">Notre algorithme analyse ton profil et le compare aux offres. Plus ton profil est complet, meilleur est le matching ! 🎯</div><div class="bt">14:31</div></div></div>
+      <div class="mbw sent"><div><div class="bubble s">Et pour l'aide CV ?</div><div class="bt">14:32</div></div></div>
+      <div class="mbw"><div class="bav">🤖</div><div><div class="bubble r">L'aide CV et le coaching entretien sont disponibles avec notre offre <strong>Premium</strong> ⭐ Tu veux en savoir plus ?</div><div class="bt">14:32</div></div></div>
+    </div>
+    <div class="quick-rep">
+      <div class="qr" onclick="addMsg('Comment postuler ?')">Comment postuler ?</div>
+      <div class="qr" onclick="go('screen-premium')">Voir Premium ⭐</div>
+      <div class="qr" onclick="addMsg('Mes candidatures ?')">Mes candidatures ?</div>
+      <div class="qr" onclick="addMsg('Comment contacter une entreprise ?')">Contacter une entreprise ?</div>
+    </div>
+    <div class="chat-input-bar">
+      <input class="ci-input" type="text" placeholder="Écris ton message..." id="ci"/>
+      <button class="send-btn" onclick="sendMsg()">➤</button>
+    </div>
+  </div>
+
+  <!-- PREMIUM -->
+  <div class="screen" id="screen-premium">
+    <div class="prem-hd"><button class="prem-close" onclick="go('screen-main')">✕</button></div>
+    <div style="overflow-y:auto;flex:1;">
+      <div class="prem-content">
+        <div class="prem-crown">👑</div>
+        <div class="prem-title">Passe en <span>Premium</span><br>et décroche ton alternance</div>
+        <div class="prem-desc">Accède à des outils exclusifs pour maximiser tes chances et te démarquer</div>
+        <div class="prem-feats">
+          <div class="prem-feat"><div class="feat-ic">📄</div><div class="feat-txt"><h4>Aide à la rédaction CV</h4><p>Un expert analyse et optimise ton CV</p></div></div>
+          <div class="prem-feat"><div class="feat-ic">🎤</div><div class="feat-txt"><h4>Coaching entretien</h4><p>Simulations avec feedback personnalisé</p></div></div>
+          <div class="prem-feat"><div class="feat-ic">⚡</div><div class="feat-txt"><h4>Profil boosté</h4><p>Apparaît en premier dans les recherches</p></div></div>
+          <div class="prem-feat"><div class="feat-ic">📊</div><div class="feat-txt"><h4>Stats de candidatures</h4><p>Vois qui consulte ton profil</p></div></div>
+        </div>
+        <div class="prem-plans">
+          <div class="plan"><div class="plan-price">9,99€</div><div class="plan-per">/ mois</div><div class="plan-name">Mensuel</div></div>
+          <div class="plan popular"><div class="plan-pop">⭐ Populaire</div><div class="plan-price">6,99€</div><div class="plan-per">/ mois</div><div class="plan-name">Annuel · -30%</div></div>
+        </div>
+        <button class="btn-prem">Commencer l'essai gratuit 7 jours</button>
+        <div style="font-size:.74rem;color:rgba(255,255,255,.3);margin-top:12px;">Sans engagement · Annulable à tout moment</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+  function sel(id){document.querySelectorAll('.choice-card').forEach(c=>c.classList.remove('selected'));document.getElementById(id).classList.add('selected');}
+  function tab(t){document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById('tab-'+t).classList.add('active');document.getElementById('nav-'+t).classList.add('active');}
+
+  let drag=false,sx=0,cx=0;
+  const card=document.getElementById('mainCard');
+  const lov=document.getElementById('likeOv');
+  const nov=document.getElementById('nopeOv');
+  card.addEventListener('mousedown',e=>{drag=true;sx=e.clientX;});
+  card.addEventListener('touchstart',e=>{drag=true;sx=e.touches[0].clientX;},{passive:true});
+  document.addEventListener('mousemove',e=>{if(!drag)return;cx=e.clientX-sx;card.style.transform=`translateX(${cx}px) rotate(${cx*.08}deg)`;const r=Math.min(Math.abs(cx)/100,1);if(cx>0){lov.style.opacity=r;nov.style.opacity=0;}else{nov.style.opacity=r;lov.style.opacity=0;}});
+  document.addEventListener('touchmove',e=>{if(!drag)return;cx=e.touches[0].clientX-sx;card.style.transform=`translateX(${cx}px) rotate(${cx*.08}deg)`;const r=Math.min(Math.abs(cx)/100,1);if(cx>0){lov.style.opacity=r;nov.style.opacity=0;}else{nov.style.opacity=r;lov.style.opacity=0;}},{passive:true});
+  document.addEventListener('mouseup',()=>{if(!drag)return;drag=false;if(cx>80)swipe('right');else if(cx<-80)swipe('left');else{card.style.transform='';lov.style.opacity=0;nov.style.opacity=0;}cx=0;});
+  document.addEventListener('touchend',()=>{if(!drag)return;drag=false;if(cx>80)swipe('right');else if(cx<-80)swipe('left');else{card.style.transform='';lov.style.opacity=0;nov.style.opacity=0;}cx=0;});
+
+  function swipe(dir){
+    if(dir==='right'||dir==='super'){card.style.transition='transform .4s ease';card.style.transform=`translateX(150%) rotate(15deg)`;lov.style.opacity=1;}
+    else{card.style.transition='transform .4s ease';card.style.transform=`translateX(-150%) rotate(-15deg)`;nov.style.opacity=1;}
+    setTimeout(()=>{card.style.transition='';card.style.transform='';lov.style.opacity=0;nov.style.opacity=0;},500);
+  }
+
+  function addMsg(txt){
+    const m=document.getElementById('chatMsgs');
+    m.innerHTML+=`<div class="mbw sent"><div><div class="bubble s">${txt}</div><div class="bt">maintenant</div></div></div>`;
+    m.scrollTop=m.scrollHeight;
+    setTimeout(()=>{m.innerHTML+=`<div class="mbw"><div class="bav">🤖</div><div><div class="bubble r">Je traite ta demande... un instant 🔄</div><div class="bt">maintenant</div></div></div>`;m.scrollTop=m.scrollHeight;},800);
+  }
+  function sendMsg(){const i=document.getElementById('ci');if(!i.value.trim())return;addMsg(i.value);i.value='';}
+  document.getElementById('ci').addEventListener('keypress',e=>{if(e.key==='Enter')sendMsg();});
+</script>
+</body>
+</html>
